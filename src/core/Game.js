@@ -94,8 +94,8 @@ export class Game {
       this.physicsManager,
       this.assetLoader
     );
-    this.player.position.set(-50, 0, -50); // Edge of city, not center
-    console.log('✓ Player spawned at EDGE:', this.player.position);
+    this.player.position.set(0, 0, 0); // Spawn in city center
+    console.log('✓ Player spawned at CENTER:', this.player.position);
 
     // Spawn enemies
     this.spawnEnemies();
@@ -434,7 +434,7 @@ export class Game {
       this.player.health = this.player.maxHealth;
       
       // Respawn at starting position
-      this.player.position.set(-50, 1.7, -50);
+      this.player.position.set(0, 1.7, 0);
       this.player.velocity.set(0, 0, 0);
       
       // Spawn new enemies for this level
@@ -462,7 +462,7 @@ export class Game {
     // Reset player
     this.player.health = this.player.maxHealth;
     this.player.isAlive = true;
-    this.player.position.set(-50, 1.7, -50);
+    this.player.position.set(0, 1.7, 0);
     this.player.velocity.set(0, 0, 0);
     this.player.weapons.forEach(w => w.reset());
     

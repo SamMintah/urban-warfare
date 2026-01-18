@@ -344,7 +344,7 @@ export class Player {
   respawn() {
     this.health = this.maxHealth;
     this.isAlive = true;
-    this.position.set(-50, 1.7, -50); // Spawn at edge, not center
+    this.position.set(0, 1.7, 0); // Spawn in city center
     this.velocity.set(0, 0, 0);
     
     // Reset weapons

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/urban-warfare/', // GitHub Pages subdirectory
+  base: process.env.NODE_ENV === 'production' ? '/urban-warfare/' : '/',
   server: {
     port: 3000,
     open: true

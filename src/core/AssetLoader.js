@@ -101,14 +101,9 @@ export class AssetLoader {
 
   async loadAudio() {
     const sounds = [
-      // Real sound files from src/sounds
-      { name: 'gunshot', path: '/src/sounds/gunshot.ogg' },
-      { name: 'background_music', path: '/src/sounds/background-music.mp3' },
-      // Fallback paths (if you move files to public later)
-      { name: 'rifle_shot', path: '/audio/weapons/rifle_shot.mp3' },
-      { name: 'pistol_shot', path: '/audio/weapons/pistol_shot.mp3' },
-      { name: 'reload', path: '/audio/weapons/reload.mp3' },
-      { name: 'impact', path: '/audio/impacts/bullet_impact.mp3' }
+      // Sound files in public folder
+      { name: 'gunshot', path: '/gunshot.ogg' },
+      { name: 'background_music', path: '/background-music.mp3' }
     ];
 
     for (const sound of sounds) {
