@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urban Warfare FPS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      background: #000;
+    }
+    #game-canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+    
+    /* Mini-map */
+    #minimap {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 300px;
+      height: 300px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00ff00;
+      border-radius: 5px;
+    }
+    
+    /* Controls guide - gamepad style */
+    #controls {
+      position: absolute;
+      bottom: 80px;
+      left: 20px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(20, 20, 20, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%);
+      border: 3px solid #00ff00;
+      border-radius: 50%;
+      padding: 30px;
+      font-size: 12px;
+      line-height: 1.4;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 8px;
+      align-content: center;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 30px rgba(0, 255, 0, 0.1);
+    }
+    #controls .control-item {
+      text-align: center;
+      color: #00ff00;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+      padding: 2px;
+    }
+    #controls .key {
+      display: inline-block;
+      background: linear-gradient(145deg, rgba(0, 255, 0, 0.3), rgba(0, 200, 0, 0.2));
+      padding: 4px 9px;
+      border-radius: 4px;
+      margin: 0 2px;
+      font-weight: bold;
+      border: 1px solid #00ff00;
+      box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+      color: #00ff00;
+    }
+    #controls .title {
+      grid-column: 1 / -1;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #00ff00;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+      text-align: center;
+    }
+    
+    #health-bar {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      width: 200px;
+      height: 30px;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #fff;
+    }
+    #health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff0000, #ff6600);
+      transition: width 0.3s;
+    }
+    #ammo-counter {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    #weapon-name {
+      position: absolute;
+      bottom: 70px;
+      right: 30px;
+      font-size: 18px;
+      opacity: 0.8;
+    }
+    #audio-status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 12px;
+      opacity: 0.7;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 3px;
+    }
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      opacity: 0.8;
+    }
+    #crosshair::before,
+    #crosshair::after {
+      content: '';
+      position: absolute;
+      background: #ff3333;
+      box-shadow: 0 0 3px rgba(255, 51, 51, 0.8);
+    }
+    #crosshair::before {
+      width: 2px;
+      height: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #crosshair::after {
+      width: 20px;
+      height: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #damage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, transparent 30%, rgba(255,0,0,0.3) 100%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    #death-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #death-screen h1 {
+      font-size: 72px;
+      color: #ff0000;
+      margin-bottom: 20px;
+    }
+    #death-screen p {
+      font-size: 24px;
+      pointer-events: all;
+      cursor: pointer;
+      padding: 10px 20px;
+      border: 2px solid #fff;
+      margin-top: 20px;
+    }
+    #death-screen p:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    #level-complete-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #level-complete-screen h1 {
+      font-size: 72px;
+      color: #00ff00;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 2px 2px 8px rgba(0, 0, 0, 1);
+    }
+    #level-complete-screen p {
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+    }
+    #level-complete-screen p:hover {
+      background: rgba(0,255,0,0.2);
+      transform: scale(1.05);
+    }
+    #game-complete-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #game-complete-screen h1 {
+      font-size: 72px;
+      text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+    }
+    #game-complete-screen p:hover {
+      background: rgba(255,170,0,0.1);
+    }
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('/background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    #start-screen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    #start-screen h1 {
+      font-size: 64px;
+      margin-bottom: 40px;
+      color: #00ff00;
+      position: relative;
+      z-index: 1;
+      animation: slideDown 1s ease-out;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    }
+    #start-screen button {
+      font-size: 24px;
+      padding: 15px 40px;
+      background: #00ff00;
+      border: none;
+      color: #000;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      pointer-events: all;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s;
+    }
+    #start-screen button:hover {
+      background: #00cc00;
+      transform: scale(1.05);
+    }
+    @keyframes slideDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen">
+    <h1>URBAN WARFARE</h1>
+    <div id="loading-container" style="width: 300px; height: 20px; background: rgba(255,255,255,0.2); margin: 20px 0; display: none;">
+      <div id="loading-progress" style="width: 0%; height: 100%; background: #00ff00; transition: width 0.3s;"></div>
+    </div>
+    <button id="start-button">CLICK TO START</button>
+    <p style="margin-top: 30px; font-size: 18px; opacity: 0.9; color: #00ff00; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); position: relative; z-index: 1;">WASD - Move | Mouse - Look | Click - Shoot</p>
+  </div>
+  <div id="hud">
+    <canvas id="minimap"></canvas>
+    <div id="controls">
+      <div class="title">Controls</div>
+      <div class="control-item"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Move</div>
+      <div class="control-item"><span class="key">Mouse</span> Look</div>
+      <div class="control-item"><span class="key">Left Click</span> Shoot</div>
+    </div>
+    <div id="audio-status">🔇 Audio: Initializing...</div>
+    <div id="health-bar">
+      <div id="health-fill" style="width: 100%;"></div>
+    </div>
+    <div id="ammo-counter">30 / 90</div>
+    <div id="weapon-name">M4A1 CARBINE</div>
+    <div id="crosshair"></div>
+    <div id="damage-overlay"></div>
+    <div id="death-screen">
+      <h1>K.I.A.</h1>
+      <p id="respawn-button">RESPAWN</p>
+    </div>
+    <div id="level-complete-screen" style="display: none;">
+      <h1 style="color: #00ff00;">LEVEL COMPLETE!</h1>
+      <p id="level-stats" style="font-size: 24px; margin: 20px 0;"></p>
+      <p id="next-level-button" style="font-size: 24px; pointer-events: all; cursor: pointer; padding: 10px 20px; border: 2px solid #00ff00; margin-top: 20px;">NEXT LEVEL</p>
+    </div>
+    <div id="game-complete-screen" style="display: none;">
+      <h1 style="color: #ffaa00;">GAME COMPLETE!</h1>
+      <p style="font-size: 32px; margin: 20px 0;">🏆 YOU WIN! 🏆</p>
+      <p style="font-size: 20px; margin: 20px 0;">You defeated all enemies across 3 levels!</p>
+      <p id="restart-button" style="font-size: 24px; pointer-events: all; cursor: pointer; padding: 10px 20px; border: 2px solid #ffaa00; margin-top: 20px;">PLAY AGAIN</p>
+    </div>
+  </div>
+  <audio id="background-music" loop>
+    <source src="/audio/background_music.mp3" type="audio/mpeg">
+  </audio>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
