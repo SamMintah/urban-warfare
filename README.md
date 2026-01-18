@@ -4,7 +4,8 @@ A fully-featured first-person shooter game built entirely with Three.js and vani
 
 🎮 **[Play Live Demo](https://SamMintah.github.io/urban-warfare-fps)**
 
-![Game Screenshot](screenshot.png)
+<img width="2560" height="1440" alt="Screenshot 2026-01-18 at 10 57 13 PM (3)" src="https://github.com/user-attachments/assets/f03e9cc8-147b-4ae6-a665-abf4393ad68e" />
+
 
 ## Features
 
