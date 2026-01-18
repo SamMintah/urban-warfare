@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './', // Use relative paths for GitHub Pages
+  base: '/urban-warfare/', // GitHub Pages subdirectory
   server: {
     port: 3000,
     open: true
