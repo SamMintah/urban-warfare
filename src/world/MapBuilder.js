@@ -8,6 +8,8 @@ export class MapBuilder {
   }
 
   clearMap() {
+    console.log(`🗑️ Clearing map - ${this.mapObjects.length} objects, ${this.physicsManager.colliders.length} colliders`);
+    
     // Remove all map objects from scene
     this.mapObjects.forEach(obj => {
       this.scene.remove(obj);
@@ -25,7 +27,7 @@ export class MapBuilder {
     // Clear all colliders
     this.physicsManager.colliders = [];
     
-    console.log('✓ Map cleared');
+    console.log('✓ Map cleared - Ready for new level');
   }
 
   buildMapForLevel(level) {
@@ -49,7 +51,7 @@ export class MapBuilder {
         this.buildLevel1();
     }
     
-    console.log(`✓ Built map for Level ${level}`);
+    console.log(`✓ Built map for Level ${level} - ${this.mapObjects.length} objects, ${this.physicsManager.colliders.length} colliders`);
   }
 
   buildLevel1() {
@@ -269,6 +271,9 @@ export class MapBuilder {
     this.scene.add(ground);
     this.mapObjects.push(ground); // Track for cleanup
 
+    // Update world matrix before adding collider
+    ground.updateMatrixWorld(true);
+    
     // Add ground collider
     this.physicsManager.addCollider(ground);
 
@@ -300,6 +305,9 @@ export class MapBuilder {
     // Add windows
     this.addWindows(building, width, height, depth);
 
+    // Update world matrix before adding collider
+    building.updateMatrixWorld(true);
+    
     // Add collider
     this.physicsManager.addCollider(building);
 
@@ -357,6 +365,9 @@ export class MapBuilder {
     this.scene.add(wall);
     this.mapObjects.push(wall); // Track for cleanup
 
+    // Update world matrix before adding collider
+    wall.updateMatrixWorld(true);
+    
     this.physicsManager.addCollider(wall);
     return wall;
   }
@@ -454,6 +465,9 @@ export class MapBuilder {
     const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
     crate.add(edges);
 
+    // Update world matrix before adding collider
+    crate.updateMatrixWorld(true);
+    
     this.physicsManager.addCollider(crate);
     return crate;
   }

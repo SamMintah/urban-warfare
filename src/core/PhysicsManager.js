@@ -20,7 +20,11 @@ export class PhysicsManager {
     };
     
     this.colliders.push(collider);
-    console.log('✓ Added collider:', mesh.position, 'Size:', bounds.getSize(new THREE.Vector3()));
+    const size = bounds.getSize(new THREE.Vector3());
+    console.log(`✓ Collider #${this.colliders.length}:`, 
+      `pos(${mesh.position.x.toFixed(1)}, ${mesh.position.y.toFixed(1)}, ${mesh.position.z.toFixed(1)})`,
+      `size(${size.x.toFixed(1)} x ${size.y.toFixed(1)} x ${size.z.toFixed(1)})`
+    );
     return collider;
   }
 
