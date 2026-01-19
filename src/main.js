@@ -37,18 +37,64 @@ startButton.addEventListener('click', async () => {
   }
   
   // Request pointer lock after game is ready
-  document.body.requestPointerLock();
+  requestPointerLock();
   
   // Make game accessible for debugging
   window.game = game;
   console.log('Game started! Type "game" in console to debug.');
 });
 
-// Handle pointer lock
-document.addEventListener('pointerlockchange', () => {
-  if (document.pointerLockElement === document.body) {
-    if (game) game.resume();
+// Handle pointer lock (Safari compatibility)
+const pointerLockChange = () => {
+  const isLocked = document.pointerLockElement === document.body || 
+                   document.mozPointerLockElement === document.body ||
+                   document.webkitPointerLockElement === document.body;
+  
+  if (isLocked) {
+    if (game && game.isPaused) {
+      game.resume();
+    }
+    document.body.style.cursor = 'none'; // Hide cursor
   } else {
-    if (game) game.pause();
+    // Don't auto-pause if we're showing a menu screen
+    if (game && game.gameState === 'playing' && !game.isPaused) {
+      // User pressed ESC - show pause menu
+      game.togglePause();
+    }
+    document.body.style.cursor = 'default'; // Show cursor
+  }
+};
+
+document.addEventListener('pointerlockchange', pointerLockChange);
+document.addEventListener('mozpointerlockchange', pointerLockChange);
+document.addEventListener('webkitpointerlockchange', pointerLockChange);
+
+// Handle ESC key for pause menu toggle
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && game && game.isRunning && game.gameState === 'playing') {
+    e.preventDefault();
+    game.togglePause();
   }
 });
+
+// Pause menu buttons
+document.getElementById('resume-button').addEventListener('click', () => {
+  if (game) {
+    game.togglePause();
+  }
+});
+
+document.getElementById('quit-button').addEventListener('click', () => {
+  if (game) {
+    game.quitToMenu();
+  }
+});
+
+// Request pointer lock with Safari compatibility
+function requestPointerLock() {
+  const element = document.body;
+  element.requestPointerLock = element.requestPointerLock ||
+                                element.mozRequestPointerLock ||
+                                element.webkitRequestPointerLock;
+  element.requestPointerLock();
+}

@@ -7,6 +7,7 @@ export class UIManager {
     this.deathScreen = document.getElementById('death-screen');
     this.levelCompleteScreen = document.getElementById('level-complete-screen');
     this.gameCompleteScreen = document.getElementById('game-complete-screen');
+    this.pauseScreen = document.getElementById('pause-screen');
     this.crosshair = document.getElementById('crosshair');
     this.audioStatus = document.getElementById('audio-status');
     
@@ -186,5 +187,13 @@ export class UIManager {
 
   hideGameCompleteScreen() {
     this.gameCompleteScreen.style.display = 'none';
+  }
+
+  showPauseScreen() {
+    this.pauseScreen.style.display = 'flex';
+  }
+
+  hidePauseScreen() {
+    this.pauseScreen.style.display = 'none';
   }
 }

@@ -15,6 +15,9 @@
       font-family: 'Courier New', monospace;
       background: #000;
     }
+    body.playing {
+      cursor: none !important;
+    }
     #game-canvas {
       display: block;
       width: 100vw;
@@ -240,6 +243,42 @@
     #game-complete-screen p:hover {
       background: rgba(255,170,0,0.1);
     }
+    #pause-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 100;
+    }
+    #pause-screen h1 {
+      font-size: 64px;
+      color: #00ff00;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+    #pause-screen button {
+      font-size: 20px;
+      padding: 12px 30px;
+      margin: 10px;
+      background: #00ff00;
+      border: none;
+      color: #000;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      pointer-events: all;
+      transition: transform 0.2s;
+    }
+    #pause-screen button:hover {
+      background: #00cc00;
+      transform: scale(1.05);
+    }
     #start-screen {
       position: absolute;
       top: 0;
@@ -343,6 +382,11 @@
       <p style="font-size: 32px; margin: 20px 0;">🏆 YOU WIN! 🏆</p>
       <p style="font-size: 20px; margin: 20px 0;">You defeated all enemies across 3 levels!</p>
       <p id="restart-button" style="font-size: 24px; pointer-events: all; cursor: pointer; padding: 10px 20px; border: 2px solid #ffaa00; margin-top: 20px;">PLAY AGAIN</p>
+    </div>
+    <div id="pause-screen">
+      <h1>PAUSED</h1>
+      <button id="resume-button">RESUME</button>
+      <button id="quit-button">QUIT TO MENU</button>
     </div>
   </div>
   <audio id="background-music" loop>

@@ -291,12 +291,27 @@ export class Weapon {
   }
 
   reload() {
-    if (this.isReloading || this.currentAmmo === this.magazineSize || this.reserveAmmo === 0) {
+    console.log(`🔄 Reload attempt - Current: ${this.currentAmmo}, Reserve: ${this.reserveAmmo}, IsReloading: ${this.isReloading}`);
+    
+    if (this.isReloading) {
+      console.log('❌ Already reloading');
+      return;
+    }
+    
+    if (this.currentAmmo === this.magazineSize) {
+      console.log('❌ Magazine full');
+      return;
+    }
+    
+    if (this.reserveAmmo === 0) {
+      console.log('❌ No reserve ammo');
       return;
     }
 
     this.isReloading = true;
     this.reloadTime = 0;
+
+    console.log(`✓ Starting reload - Duration: ${this.reloadDuration}s`);
 
     // Play reload animation
     if (this.animations.reload) {
@@ -310,9 +325,13 @@ export class Weapon {
     const ammoNeeded = this.magazineSize - this.currentAmmo;
     const ammoToReload = Math.min(ammoNeeded, this.reserveAmmo);
     
+    console.log(`✓ Reload complete - Adding ${ammoToReload} ammo (${this.currentAmmo} -> ${this.currentAmmo + ammoToReload})`);
+    
     this.currentAmmo += ammoToReload;
     this.reserveAmmo -= ammoToReload;
     this.isReloading = false;
+    
+    console.log(`   New totals - Current: ${this.currentAmmo}, Reserve: ${this.reserveAmmo}`);
   }
 
   reset() {

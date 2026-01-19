@@ -443,7 +443,7 @@ export class Game {
       this.uiManager.hideLevelCompleteScreen();
       
       // Re-lock pointer for gameplay
-      document.body.requestPointerLock();
+      this.requestPointerLock();
       
       console.log(`🎮 Starting Level ${this.currentLevel}`);
     } else {
@@ -472,7 +472,7 @@ export class Game {
     this.uiManager.hideGameCompleteScreen();
     
     // Re-lock pointer for gameplay
-    document.body.requestPointerLock();
+    this.requestPointerLock();
     
     console.log('🎮 Game restarted - Level 1');
   }
@@ -491,7 +491,7 @@ export class Game {
     });
     
     // Re-lock pointer for gameplay
-    document.body.requestPointerLock();
+    this.requestPointerLock();
     
     console.log('✓ Respawned - Player alive:', this.player.isAlive, 'Health:', this.player.health);
   }
@@ -504,5 +504,58 @@ export class Game {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  requestPointerLock() {
+    const element = document.body;
+    element.requestPointerLock = element.requestPointerLock ||
+                                  element.mozRequestPointerLock ||
+                                  element.webkitRequestPointerLock;
+    if (element.requestPointerLock) {
+      element.requestPointerLock();
+    }
+  }
+
+  togglePause() {
+    if (this.isPaused) {
+      // Resume
+      this.isPaused = false;
+      this.uiManager.hidePauseScreen();
+      this.requestPointerLock();
+    } else {
+      // Pause
+      this.isPaused = true;
+      this.uiManager.showPauseScreen();
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
+    }
+  }
+
+  quitToMenu() {
+    // Stop the game
+    this.isRunning = false;
+    this.isPaused = false;
+    
+    // Hide all screens
+    this.uiManager.hidePauseScreen();
+    this.uiManager.hideDeathScreen();
+    this.uiManager.hideLevelCompleteScreen();
+    this.uiManager.hideGameCompleteScreen();
+    
+    // Show start screen
+    document.getElementById('start-screen').style.display = 'flex';
+    
+    // Exit pointer lock
+    if (document.pointerLockElement) {
+      document.exitPointerLock();
+    }
+    
+    // Reset game state
+    this.currentLevel = 1;
+    this.enemiesKilled = 0;
+    this.gameState = 'playing';
+    
+    console.log('✓ Quit to menu');
   }
 }
