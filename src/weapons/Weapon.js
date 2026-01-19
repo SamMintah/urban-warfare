@@ -15,7 +15,7 @@ export class Weapon {
 
     // Ammo
     this.currentAmmo = this.magazineSize;
-    this.reserveAmmo = this.magazineSize * 3;
+    this.reserveAmmo = this.magazineSize * 10; // Increased from 3 to 10 mags
     this.isReloading = false;
     this.reloadTime = 0;
 
@@ -336,7 +336,7 @@ export class Weapon {
 
   reset() {
     this.currentAmmo = this.magazineSize;
-    this.reserveAmmo = this.magazineSize * 3;
+    this.reserveAmmo = this.magazineSize * 10; // Increased from 3 to 10 mags
     this.isReloading = false;
     this.reloadTime = 0;
   }

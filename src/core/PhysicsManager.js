@@ -45,10 +45,15 @@ export class PhysicsManager {
     );
 
     let hitObstacle = false;
+    let collisionCount = 0;
 
     for (const collider of this.colliders) {
+      // Update collider bounds to current mesh position
+      collider.bounds.setFromObject(collider.mesh);
+      
       if (playerBox.intersectsBox(collider.bounds)) {
         hitObstacle = true;
+        collisionCount++;
         
         // Calculate overlap amount
         const playerCenter = new THREE.Vector3();
@@ -69,16 +74,24 @@ export class PhysicsManager {
         const overlapZ = (playerSize.z + colliderSize.z) / 2 - Math.abs(direction.z);
         
         // Push player out along the axis with least overlap
-        if (overlapX < overlapZ) {
-          // Push along X axis
-          position.x += Math.sign(direction.x) * overlapX;
-          velocity.x = 0;
-        } else {
-          // Push along Z axis
-          position.z += Math.sign(direction.z) * overlapZ;
-          velocity.z = 0;
+        if (overlapX > 0 && overlapZ > 0) {
+          if (overlapX < overlapZ) {
+            // Push along X axis
+            const pushAmount = overlapX * 1.1; // Add 10% extra to ensure separation
+            position.x += Math.sign(direction.x) * pushAmount;
+            velocity.x = 0;
+          } else {
+            // Push along Z axis
+            const pushAmount = overlapZ * 1.1; // Add 10% extra to ensure separation
+            position.z += Math.sign(direction.z) * pushAmount;
+            velocity.z = 0;
+          }
         }
       }
+    }
+    
+    if (collisionCount > 0) {
+      console.log(`🚧 Hit ${collisionCount} obstacles`);
     }
     
     return hitObstacle;

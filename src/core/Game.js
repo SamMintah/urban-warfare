@@ -80,7 +80,7 @@ export class Game {
 
     // Build map
     this.mapBuilder = new MapBuilder(this.scene, this.physicsManager);
-    this.mapBuilder.buildUrbanMap();
+    this.mapBuilder.buildMapForLevel(1); // Start with Level 1 map
 
     // Add lighting
     this.setupLighting();
@@ -437,6 +437,10 @@ export class Game {
       this.player.position.set(0, 1.7, 0);
       this.player.velocity.set(0, 0, 0);
       
+      // Rebuild map for new level
+      this.mapBuilder.buildMapForLevel(this.currentLevel);
+      console.log(`🗺️ Built new map for Level ${this.currentLevel}`);
+      
       // Spawn new enemies for this level
       this.spawnEnemies();
       
@@ -465,6 +469,10 @@ export class Game {
     this.player.position.set(0, 1.7, 0);
     this.player.velocity.set(0, 0, 0);
     this.player.weapons.forEach(w => w.reset());
+    
+    // Rebuild map for level 1
+    this.mapBuilder.buildMapForLevel(1);
+    console.log('🗺️ Built Level 1 map');
     
     // Spawn level 1 enemies
     this.spawnEnemies();

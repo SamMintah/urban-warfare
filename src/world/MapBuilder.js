@@ -4,117 +4,255 @@ export class MapBuilder {
   constructor(scene, physicsManager) {
     this.scene = scene;
     this.physicsManager = physicsManager;
+    this.mapObjects = []; // Track all map objects for cleanup
+  }
+
+  clearMap() {
+    // Remove all map objects from scene
+    this.mapObjects.forEach(obj => {
+      this.scene.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(mat => mat.dispose());
+        } else {
+          obj.material.dispose();
+        }
+      }
+    });
+    this.mapObjects = [];
+    
+    // Clear all colliders
+    this.physicsManager.colliders = [];
+    
+    console.log('✓ Map cleared');
+  }
+
+  buildMapForLevel(level) {
+    this.clearMap();
+    
+    // Build ground (same for all levels)
+    this.createGround();
+    
+    // Build level-specific map
+    switch(level) {
+      case 1:
+        this.buildLevel1();
+        break;
+      case 2:
+        this.buildLevel2();
+        break;
+      case 3:
+        this.buildLevel3();
+        break;
+      default:
+        this.buildLevel1();
+    }
+    
+    console.log(`✓ Built map for Level ${level}`);
+  }
+
+  buildLevel1() {
+    // LEVEL 1: SMALL TOWN - Wide streets, simple grid, low buildings
+    // COLOR SCHEME: Warm suburban colors (beige, cream, light brown)
+    
+    // North side - Small shops (cream/beige)
+    this.createBuilding(new THREE.Vector3(15, 0, 30), 10, 6, 8, 0xD4C5B9);
+    this.createBuilding(new THREE.Vector3(-15, 0, 30), 10, 6, 8, 0xE8DCC4);
+    this.createBuilding(new THREE.Vector3(0, 0, 35), 8, 5, 6, 0xC9B8A3);
+    
+    // South side - Houses (light brown/tan)
+    this.createBuilding(new THREE.Vector3(18, 0, -25), 8, 5, 8, 0xB8A58A);
+    this.createBuilding(new THREE.Vector3(-18, 0, -25), 8, 5, 8, 0xD4C5B9);
+    this.createBuilding(new THREE.Vector3(0, 0, -30), 10, 6, 10, 0xC9B8A3);
+    
+    // East side - Small buildings (warm beige)
+    this.createBuilding(new THREE.Vector3(30, 0, 10), 8, 7, 8, 0xE8DCC4);
+    this.createBuilding(new THREE.Vector3(30, 0, -10), 8, 7, 8, 0xD4C5B9);
+    
+    // West side - Small buildings (light tan)
+    this.createBuilding(new THREE.Vector3(-30, 0, 10), 8, 7, 8, 0xB8A58A);
+    this.createBuilding(new THREE.Vector3(-30, 0, -10), 8, 7, 8, 0xC9B8A3);
+    
+    // Center area - Small plaza
+    this.createCrate(new THREE.Vector3(5, 0, 5));
+    this.createCrate(new THREE.Vector3(-5, 0, 5));
+    this.createCrate(new THREE.Vector3(5, 0, -5));
+    this.createCrate(new THREE.Vector3(-5, 0, -5));
+    
+    // Simple walls for cover
+    this.createWall(new THREE.Vector3(0, 0, 15), 12, 2, 0.5);
+    this.createWall(new THREE.Vector3(15, 0, 0), 0.5, 2, 12);
+    this.createWall(new THREE.Vector3(-15, 0, 0), 0.5, 2, 12);
+    
+    // Parked cars on wide streets
+    this.createCar(new THREE.Vector3(10, 0, 20), 0);
+    this.createCar(new THREE.Vector3(-10, 0, 20), Math.PI);
+    this.createCar(new THREE.Vector3(20, 0, 0), Math.PI / 2);
+    this.createCar(new THREE.Vector3(-20, 0, -15), -Math.PI / 4);
+    
+    // Street lights
+    this.createStreetLight(new THREE.Vector3(12, 0, 12));
+    this.createStreetLight(new THREE.Vector3(-12, 0, 12));
+    this.createStreetLight(new THREE.Vector3(12, 0, -12));
+    this.createStreetLight(new THREE.Vector3(-12, 0, -12));
+  }
+
+  buildLevel2() {
+    // LEVEL 2: MODERN DOWNTOWN - Skyscrapers, medium streets, business district
+    // COLOR SCHEME: Modern glass/steel (blue-grey, silver, dark grey)
+    
+    // Central skyscraper cluster (dark blue-grey)
+    this.createBuilding(new THREE.Vector3(0, 0, 0), 12, 25, 12, 0x4A5568); // Center tower
+    this.createBuilding(new THREE.Vector3(20, 0, 0), 10, 22, 10, 0x5A6A7A);
+    this.createBuilding(new THREE.Vector3(-20, 0, 0), 10, 22, 10, 0x3A4A5A);
+    this.createBuilding(new THREE.Vector3(0, 0, 20), 10, 20, 10, 0x6A7A8A);
+    this.createBuilding(new THREE.Vector3(0, 0, -20), 10, 20, 10, 0x4A5A6A);
+    
+    // Corner towers (steel grey)
+    this.createBuilding(new THREE.Vector3(35, 0, 35), 14, 28, 14, 0x708090);
+    this.createBuilding(new THREE.Vector3(-35, 0, 35), 14, 28, 14, 0x778899);
+    this.createBuilding(new THREE.Vector3(35, 0, -35), 14, 28, 14, 0x6A7A8A);
+    this.createBuilding(new THREE.Vector3(-35, 0, -35), 14, 28, 14, 0x5A6A7A);
+    
+    // Mid-rise buildings (lighter grey/blue)
+    this.createBuilding(new THREE.Vector3(40, 0, 15), 12, 15, 10, 0x8899AA);
+    this.createBuilding(new THREE.Vector3(-40, 0, 15), 12, 15, 10, 0x7788AA);
+    this.createBuilding(new THREE.Vector3(40, 0, -15), 12, 15, 10, 0x6A7A9A);
+    this.createBuilding(new THREE.Vector3(-40, 0, -15), 12, 15, 10, 0x8899BB);
+    this.createBuilding(new THREE.Vector3(15, 0, 40), 10, 15, 12, 0x7788AA);
+    this.createBuilding(new THREE.Vector3(-15, 0, 40), 10, 15, 12, 0x6A7A9A);
+    this.createBuilding(new THREE.Vector3(15, 0, -40), 10, 15, 12, 0x8899AA);
+    this.createBuilding(new THREE.Vector3(-15, 0, -40), 10, 15, 12, 0x5A6A8A);
+    
+    // Office building walls
+    this.createWall(new THREE.Vector3(10, 0, 10), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(-10, 0, 10), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(10, 0, -10), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(-10, 0, -10), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(25, 0, 25), 10, 3, 0.5);
+    this.createWall(new THREE.Vector3(-25, 0, -25), 10, 3, 0.5);
+    
+    // Business district crates/barriers
+    this.createCrate(new THREE.Vector3(8, 0, 8));
+    this.createCrate(new THREE.Vector3(-8, 0, 8));
+    this.createCrate(new THREE.Vector3(8, 0, -8));
+    this.createCrate(new THREE.Vector3(-8, 0, -8));
+    this.createCrate(new THREE.Vector3(28, 0, 0));
+    this.createCrate(new THREE.Vector3(-28, 0, 0));
+    this.createCrate(new THREE.Vector3(0, 0, 28));
+    this.createCrate(new THREE.Vector3(0, 0, -28));
+    
+    // Downtown traffic
+    this.createCar(new THREE.Vector3(12, 0, 0), 0);
+    this.createCar(new THREE.Vector3(-12, 0, 0), Math.PI);
+    this.createCar(new THREE.Vector3(0, 0, 12), Math.PI / 2);
+    this.createCar(new THREE.Vector3(0, 0, -12), -Math.PI / 2);
+    this.createCar(new THREE.Vector3(25, 0, 25), Math.PI / 4);
+    this.createCar(new THREE.Vector3(-25, 0, 25), -Math.PI / 4);
+    this.createCar(new THREE.Vector3(25, 0, -25), 3 * Math.PI / 4);
+    this.createCar(new THREE.Vector3(-25, 0, -25), -3 * Math.PI / 4);
+    
+    // Modern street lights
+    this.createStreetLight(new THREE.Vector3(15, 0, 15));
+    this.createStreetLight(new THREE.Vector3(-15, 0, 15));
+    this.createStreetLight(new THREE.Vector3(15, 0, -15));
+    this.createStreetLight(new THREE.Vector3(-15, 0, -15));
+    this.createStreetLight(new THREE.Vector3(30, 0, 30));
+    this.createStreetLight(new THREE.Vector3(-30, 0, 30));
+    this.createStreetLight(new THREE.Vector3(30, 0, -30));
+    this.createStreetLight(new THREE.Vector3(-30, 0, -30));
+  }
+
+  buildLevel3() {
+    // LEVEL 3: OLD CITY MAZE - Narrow alleys, irregular layout, dense chaos
+    // COLOR SCHEME: Ancient/weathered (dark red brick, brown stone, aged colors)
+    
+    // Irregular cluster - North section (dark red brick)
+    this.createBuilding(new THREE.Vector3(8, 0, 25), 8, 12, 12, 0x8B4513);
+    this.createBuilding(new THREE.Vector3(-10, 0, 28), 10, 14, 8, 0x9B5523);
+    this.createBuilding(new THREE.Vector3(22, 0, 30), 6, 10, 10, 0x7B3F13);
+    this.createBuilding(new THREE.Vector3(-25, 0, 22), 12, 16, 6, 0xA0522D);
+    this.createBuilding(new THREE.Vector3(5, 0, 42), 8, 11, 8, 0x8B4513);
+    this.createBuilding(new THREE.Vector3(-18, 0, 45), 10, 13, 10, 0x9B5523);
+    
+    // Irregular cluster - South section (brown stone)
+    this.createBuilding(new THREE.Vector3(12, 0, -22), 10, 15, 8, 0x6B4423);
+    this.createBuilding(new THREE.Vector3(-8, 0, -28), 8, 12, 12, 0x7B5533);
+    this.createBuilding(new THREE.Vector3(28, 0, -25), 6, 14, 10, 0x5B3413);
+    this.createBuilding(new THREE.Vector3(-22, 0, -30), 12, 10, 8, 0x8B6533);
+    this.createBuilding(new THREE.Vector3(8, 0, -45), 10, 16, 6, 0x6B4423);
+    this.createBuilding(new THREE.Vector3(-15, 0, -42), 8, 13, 10, 0x7B5533);
+    
+    // Irregular cluster - East section (aged terracotta)
+    this.createBuilding(new THREE.Vector3(35, 0, 8), 8, 14, 10, 0xB8734F);
+    this.createBuilding(new THREE.Vector3(42, 0, -5), 10, 12, 8, 0xA8633F);
+    this.createBuilding(new THREE.Vector3(38, 0, 20), 6, 16, 12, 0xC8835F);
+    this.createBuilding(new THREE.Vector3(50, 0, 12), 12, 11, 8, 0xB8734F);
+    this.createBuilding(new THREE.Vector3(45, 0, -18), 8, 15, 10, 0xA8633F);
+    
+    // Irregular cluster - West section (dark weathered stone)
+    this.createBuilding(new THREE.Vector3(-35, 0, 5), 10, 13, 8, 0x5A4A3A);
+    this.createBuilding(new THREE.Vector3(-42, 0, -8), 8, 14, 10, 0x6A5A4A);
+    this.createBuilding(new THREE.Vector3(-38, 0, 18), 12, 12, 6, 0x4A3A2A);
+    this.createBuilding(new THREE.Vector3(-48, 0, -15), 8, 16, 10, 0x7A6A5A);
+    this.createBuilding(new THREE.Vector3(-45, 0, 25), 10, 11, 8, 0x5A4A3A);
+    
+    // Center chaos - Mixed heights (varied old colors)
+    this.createBuilding(new THREE.Vector3(5, 0, 5), 6, 8, 8, 0x8B5A3C);
+    this.createBuilding(new THREE.Vector3(-8, 0, 8), 8, 10, 6, 0x9B6A4C);
+    this.createBuilding(new THREE.Vector3(12, 0, -5), 6, 12, 10, 0x7B4A2C);
+    this.createBuilding(new THREE.Vector3(-5, 0, -10), 10, 9, 8, 0xAB7A5C);
+    this.createBuilding(new THREE.Vector3(18, 0, 10), 8, 14, 6, 0x8B5A3C);
+    this.createBuilding(new THREE.Vector3(-15, 0, -2), 6, 11, 8, 0x9B6A4C);
+    
+    // Maze walls - Create narrow passages
+    this.createWall(new THREE.Vector3(15, 0, 15), 6, 3, 0.5);
+    this.createWall(new THREE.Vector3(-15, 0, 15), 6, 3, 0.5);
+    this.createWall(new THREE.Vector3(15, 0, -15), 6, 3, 0.5);
+    this.createWall(new THREE.Vector3(-15, 0, -15), 6, 3, 0.5);
+    this.createWall(new THREE.Vector3(25, 0, 0), 0.5, 3, 8);
+    this.createWall(new THREE.Vector3(-25, 0, 0), 0.5, 3, 8);
+    this.createWall(new THREE.Vector3(0, 0, 25), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(0, 0, -25), 8, 3, 0.5);
+    this.createWall(new THREE.Vector3(32, 0, 32), 10, 3, 0.5);
+    this.createWall(new THREE.Vector3(-32, 0, 32), 10, 3, 0.5);
+    this.createWall(new THREE.Vector3(32, 0, -32), 10, 3, 0.5);
+    this.createWall(new THREE.Vector3(-32, 0, -32), 10, 3, 0.5);
+    
+    // Scattered obstacles everywhere
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2;
+      const radius = 15 + Math.random() * 25;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      this.createCrate(new THREE.Vector3(x, 0, z));
+    }
+    
+    // Abandoned vehicles blocking paths
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const radius = 10 + Math.random() * 30;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const rot = Math.random() * Math.PI * 2;
+      this.createCar(new THREE.Vector3(x, 0, z), rot);
+    }
+    
+    // Dim street lights in maze
+    this.createStreetLight(new THREE.Vector3(20, 0, 20));
+    this.createStreetLight(new THREE.Vector3(-20, 0, 20));
+    this.createStreetLight(new THREE.Vector3(20, 0, -20));
+    this.createStreetLight(new THREE.Vector3(-20, 0, -20));
+    this.createStreetLight(new THREE.Vector3(35, 0, 0));
+    this.createStreetLight(new THREE.Vector3(-35, 0, 0));
+    this.createStreetLight(new THREE.Vector3(0, 0, 35));
+    this.createStreetLight(new THREE.Vector3(0, 0, -35));
   }
 
   buildUrbanMap() {
-    // Ground
-    this.createGround();
-
-    // EXTENDED CITY - More buildings in all directions
-    // Central area buildings
-    this.createBuilding(new THREE.Vector3(20, 0, 20), 15, 12, 10);
-    this.createBuilding(new THREE.Vector3(-25, 0, 25), 12, 15, 12);
-    this.createBuilding(new THREE.Vector3(30, 0, -20), 10, 10, 8);
-    this.createBuilding(new THREE.Vector3(-20, 0, -25), 18, 8, 15);
-    this.createBuilding(new THREE.Vector3(40, 0, 10), 12, 18, 12);
-    this.createBuilding(new THREE.Vector3(-35, 0, -10), 14, 10, 14);
-    this.createBuilding(new THREE.Vector3(10, 0, -35), 16, 14, 10);
-    this.createBuilding(new THREE.Vector3(-15, 0, 40), 10, 12, 16);
-
-    // Extended north area
-    this.createBuilding(new THREE.Vector3(50, 0, 45), 14, 16, 12);
-    this.createBuilding(new THREE.Vector3(-40, 0, 50), 16, 14, 14);
-    this.createBuilding(new THREE.Vector3(0, 0, 55), 12, 20, 10);
-    this.createBuilding(new THREE.Vector3(25, 0, 60), 10, 12, 8);
-    this.createBuilding(new THREE.Vector3(-25, 0, 65), 18, 10, 12);
-
-    // Extended south area
-    this.createBuilding(new THREE.Vector3(45, 0, -50), 12, 14, 10);
-    this.createBuilding(new THREE.Vector3(-35, 0, -55), 14, 18, 12);
-    this.createBuilding(new THREE.Vector3(0, 0, -60), 16, 12, 14);
-    this.createBuilding(new THREE.Vector3(20, 0, -65), 10, 16, 8);
-    this.createBuilding(new THREE.Vector3(-50, 0, -45), 12, 10, 16);
-
-    // Extended east area
-    this.createBuilding(new THREE.Vector3(60, 0, 20), 14, 15, 12);
-    this.createBuilding(new THREE.Vector3(65, 0, -15), 10, 12, 10);
-    this.createBuilding(new THREE.Vector3(55, 0, 0), 16, 18, 14);
-    this.createBuilding(new THREE.Vector3(70, 0, 35), 12, 14, 8);
-
-    // Extended west area
-    this.createBuilding(new THREE.Vector3(-60, 0, 15), 14, 16, 12);
-    this.createBuilding(new THREE.Vector3(-65, 0, -20), 12, 12, 10);
-    this.createBuilding(new THREE.Vector3(-55, 0, 35), 16, 14, 14);
-    this.createBuilding(new THREE.Vector3(-70, 0, 0), 10, 18, 12);
-
-    // Smaller buildings for variety
-    this.createBuilding(new THREE.Vector3(35, 0, 35), 8, 8, 8);
-    this.createBuilding(new THREE.Vector3(-30, 0, -35), 8, 10, 8);
-    this.createBuilding(new THREE.Vector3(50, 0, -30), 8, 12, 8);
-    this.createBuilding(new THREE.Vector3(-45, 0, 30), 8, 9, 8);
-
-    // Walls and barriers - create more cover throughout city
-    this.createWall(new THREE.Vector3(0, 0, 15), 20, 3, 0.5);
-    this.createWall(new THREE.Vector3(10, 0, 0), 0.5, 3, 15);
-    this.createWall(new THREE.Vector3(-15, 0, -10), 10, 3, 0.5);
-    this.createWall(new THREE.Vector3(25, 0, 5), 15, 3, 0.5);
-    this.createWall(new THREE.Vector3(-5, 0, -20), 12, 3, 0.5);
-    this.createWall(new THREE.Vector3(-30, 0, 10), 0.5, 3, 20);
-    this.createWall(new THREE.Vector3(40, 0, 30), 18, 3, 0.5);
-    this.createWall(new THREE.Vector3(-40, 0, -30), 15, 3, 0.5);
-    this.createWall(new THREE.Vector3(30, 0, -40), 0.5, 3, 25);
-    this.createWall(new THREE.Vector3(-35, 0, 40), 0.5, 3, 20);
-
-    // Cars for cover - spread throughout city
-    this.createCar(new THREE.Vector3(5, 0, 10), 0);
-    this.createCar(new THREE.Vector3(-10, 0, 5), Math.PI / 4);
-    this.createCar(new THREE.Vector3(15, 0, -15), Math.PI / 2);
-    this.createCar(new THREE.Vector3(-20, 0, -5), Math.PI / 6);
-    this.createCar(new THREE.Vector3(25, 0, 15), -Math.PI / 3);
-    this.createCar(new THREE.Vector3(-8, 0, -18), Math.PI / 2);
-    this.createCar(new THREE.Vector3(35, 0, 25), Math.PI / 6);
-    this.createCar(new THREE.Vector3(-30, 0, 30), -Math.PI / 4);
-    this.createCar(new THREE.Vector3(40, 0, -25), Math.PI / 3);
-    this.createCar(new THREE.Vector3(-35, 0, -30), 0);
-    this.createCar(new THREE.Vector3(50, 0, 10), Math.PI / 2);
-    this.createCar(new THREE.Vector3(-45, 0, 20), -Math.PI / 6);
-
-    // Crates and obstacles - more tactical cover
-    this.createCrate(new THREE.Vector3(-5, 0, -5));
-    this.createCrate(new THREE.Vector3(8, 0, -8));
-    this.createCrate(new THREE.Vector3(-12, 0, 12));
-    this.createCrate(new THREE.Vector3(18, 0, 8));
-    this.createCrate(new THREE.Vector3(-18, 0, -12));
-    this.createCrate(new THREE.Vector3(12, 0, 20));
-    this.createCrate(new THREE.Vector3(-25, 0, 5));
-    this.createCrate(new THREE.Vector3(30, 0, 28));
-    this.createCrate(new THREE.Vector3(-28, 0, -25));
-    this.createCrate(new THREE.Vector3(38, 0, -18));
-    this.createCrate(new THREE.Vector3(-32, 0, 35));
-    this.createCrate(new THREE.Vector3(42, 0, 5));
-    this.createCrate(new THREE.Vector3(-40, 0, -15));
-    
-    // Crate stacks for variety
-    this.createCrate(new THREE.Vector3(18, 1.5, 8));
-    this.createCrate(new THREE.Vector3(-18, 1.5, -12));
-    this.createCrate(new THREE.Vector3(30, 1.5, 28));
-    this.createCrate(new THREE.Vector3(-32, 1.5, 35));
-
-    // Street lights - better coverage
-    this.createStreetLight(new THREE.Vector3(10, 0, 10));
-    this.createStreetLight(new THREE.Vector3(-15, 0, -15));
-    this.createStreetLight(new THREE.Vector3(20, 0, -10));
-    this.createStreetLight(new THREE.Vector3(-20, 0, 15));
-    this.createStreetLight(new THREE.Vector3(0, 0, 25));
-    this.createStreetLight(new THREE.Vector3(0, 0, -25));
-    this.createStreetLight(new THREE.Vector3(35, 0, 35));
-    this.createStreetLight(new THREE.Vector3(-35, 0, 35));
-    this.createStreetLight(new THREE.Vector3(35, 0, -35));
-    this.createStreetLight(new THREE.Vector3(-35, 0, -35));
-    this.createStreetLight(new THREE.Vector3(50, 0, 0));
-    this.createStreetLight(new THREE.Vector3(-50, 0, 0));
-    this.createStreetLight(new THREE.Vector3(0, 0, 50));
-    this.createStreetLight(new THREE.Vector3(0, 0, -50));
+    // Legacy method - now uses buildMapForLevel(1)
+    this.buildMapForLevel(1);
   }
 
   createGround() {
@@ -129,6 +267,7 @@ export class MapBuilder {
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     this.scene.add(ground);
+    this.mapObjects.push(ground); // Track for cleanup
 
     // Add ground collider
     this.physicsManager.addCollider(ground);
@@ -136,12 +275,17 @@ export class MapBuilder {
     // Add grid pattern
     const gridHelper = new THREE.GridHelper(groundSize, 50, 0x333333, 0x444444);
     this.scene.add(gridHelper);
+    this.mapObjects.push(gridHelper); // Track for cleanup
   }
 
-  createBuilding(position, width, height, depth) {
+  createBuilding(position, width, height, depth, color = null) {
     const geometry = new THREE.BoxGeometry(width, height, depth);
+    
+    // Use provided color or default brown
+    const buildingColor = color || 0x8B7355;
+    
     const material = new THREE.MeshStandardMaterial({ 
-      color: 0x8B7355,
+      color: buildingColor,
       roughness: 0.8,
       metalness: 0.2
     });
@@ -151,6 +295,7 @@ export class MapBuilder {
     building.castShadow = true;
     building.receiveShadow = true;
     this.scene.add(building);
+    this.mapObjects.push(building); // Track for cleanup
 
     // Add windows
     this.addWindows(building, width, height, depth);
@@ -210,6 +355,7 @@ export class MapBuilder {
     wall.castShadow = true;
     wall.receiveShadow = true;
     this.scene.add(wall);
+    this.mapObjects.push(wall); // Track for cleanup
 
     this.physicsManager.addCollider(wall);
     return wall;
@@ -277,6 +423,7 @@ export class MapBuilder {
     group.position.copy(position);
     group.rotation.y = rotation;
     this.scene.add(group);
+    this.mapObjects.push(group); // Track for cleanup
 
     // Add collider for the entire car group (not just body)
     group.updateMatrixWorld(true); // Update world matrix first
@@ -299,6 +446,7 @@ export class MapBuilder {
     crate.castShadow = true;
     crate.receiveShadow = true;
     this.scene.add(crate);
+    this.mapObjects.push(crate); // Track for cleanup
 
     // Add wood texture detail
     const edgeGeometry = new THREE.EdgesGeometry(geometry);
@@ -344,6 +492,7 @@ export class MapBuilder {
 
     group.position.copy(position);
     this.scene.add(group);
+    this.mapObjects.push(group); // Track for cleanup
 
     this.physicsManager.addCollider(pole);
 
