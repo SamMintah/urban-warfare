@@ -59,9 +59,10 @@ export class AssetLoader {
   }
 
   async loadCharacterModels() {
+    const base = import.meta.env.BASE_URL;
     const characters = [
-      { name: 'enemy', path: '/models/characters/enemy_soldier.glb' },
-      { name: 'player_arms', path: '/models/weapons/glock.glb' }
+      { name: 'enemy', path: `${base}models/characters/enemy_soldier.glb` },
+      { name: 'player_arms', path: `${base}models/weapons/glock.glb` }
     ];
 
     for (const character of characters) {
@@ -100,10 +101,11 @@ export class AssetLoader {
   }
 
   async loadAudio() {
+    const base = import.meta.env.BASE_URL;
     const sounds = [
       // Sound files in public folder
-      { name: 'gunshot', path: '/gunshot.ogg' },
-      { name: 'background_music', path: '/background-music.mp3' }
+      { name: 'gunshot', path: `${base}gunshot.ogg` },
+      { name: 'background_music', path: `${base}background-music.mp3` }
     ];
 
     for (const sound of sounds) {
