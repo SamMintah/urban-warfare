@@ -9,14 +9,26 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      cursor: inherit;
     }
     body {
       overflow: hidden;
       font-family: 'Courier New', monospace;
       background: #000;
     }
-    body.playing {
+    body.playing,
+    body.playing * {
       cursor: none !important;
+    }
+    #game-canvas,
+    #game-canvas *,
+    canvas,
+    canvas * {
+      cursor: none !important;
+    }
+    /* Force hide cursor with transparent 1px image */
+    body.playing {
+      cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='), none !important;
     }
     #game-canvas {
       display: block;
@@ -351,6 +363,7 @@
     </div>
     <button id="start-button">CLICK TO START</button>
     <p style="margin-top: 30px; font-size: 18px; opacity: 0.9; color: #00ff00; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); position: relative; z-index: 1;">WASD - Move | Mouse - Look | Click - Shoot</p>
+    <p style="margin-top: 10px; font-size: 12px; opacity: 0.6; color: #ffaa00; position: relative; z-index: 1;">Best experience on Chrome or Edge browsers</p>
   </div>
   <div id="hud">
     <canvas id="minimap"></canvas>

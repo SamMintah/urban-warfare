@@ -208,7 +208,16 @@ export class Player {
     }
 
     // Collision detection
-    this.physicsManager.resolveCollision(newPos, this.velocity);
+    const hitObstacle = this.physicsManager.resolveCollision(newPos, this.velocity);
+    
+    // Camera shake when hitting obstacle
+    if (hitObstacle && this.velocity.length() > 2) {
+      this.cameraShake.set(
+        (Math.random() - 0.5) * 0.03,
+        (Math.random() - 0.5) * 0.03,
+        0
+      );
+    }
 
     this.position.copy(newPos);
   }

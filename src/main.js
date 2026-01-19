@@ -15,7 +15,7 @@ startButton.addEventListener('click', async () => {
   // Start background music
   const bgMusic = document.getElementById('background-music');
   if (bgMusic) {
-    bgMusic.volume = 0.2; // Low volume for ambiance
+    bgMusic.volume = 0.2;
     bgMusic.play().catch(e => console.log('Background music autoplay blocked:', e));
   }
   
@@ -24,44 +24,64 @@ startButton.addEventListener('click', async () => {
     game = new Game();
     await game.init();
     
-    // Initialize audio on user interaction (required by browsers)
     game.audioManager.init();
     
-    // Force audio context to start with a test sound
     setTimeout(() => {
       console.log('Testing audio...');
       game.audioManager.play('rifle_shot', 1.0);
     }, 500);
     
     game.start();
+    
+    // Add click handler to canvas for pointer lock (Safari requirement)
+    if (game.renderer && game.renderer.domElement) {
+      game.renderer.domElement.addEventListener('click', () => {
+        if (!document.pointerLockElement && !document.webkitPointerLockElement) {
+          requestPointerLock();
+        }
+      });
+      
+      // Try to lock immediately
+      requestPointerLock();
+    }
+    
+    // Make game accessible for debugging
+    window.game = game;
+    console.log('Game started! Type "game" in console to debug.');
+    console.log('Click on the game screen to lock cursor');
   }
-  
-  // Request pointer lock after game is ready
-  requestPointerLock();
-  
-  // Make game accessible for debugging
-  window.game = game;
-  console.log('Game started! Type "game" in console to debug.');
 });
 
 // Handle pointer lock (Safari compatibility)
 const pointerLockChange = () => {
+  const canvas = game && game.renderer ? game.renderer.domElement : null;
   const isLocked = document.pointerLockElement === document.body || 
+                   document.pointerLockElement === canvas ||
                    document.mozPointerLockElement === document.body ||
-                   document.webkitPointerLockElement === document.body;
+                   document.mozPointerLockElement === canvas ||
+                   document.webkitPointerLockElement === document.body ||
+                   document.webkitPointerLockElement === canvas;
   
   if (isLocked) {
+    console.log('✓ Pointer locked!');
     if (game && game.isPaused) {
       game.resume();
     }
-    document.body.style.cursor = 'none'; // Hide cursor
+    // Force hide cursor on all browsers
+    document.body.style.cursor = 'none';
+    document.body.classList.add('playing');
+    if (canvas) {
+      canvas.style.cursor = 'none';
+    }
   } else {
+    console.log('✗ Pointer unlocked');
     // Don't auto-pause if we're showing a menu screen
     if (game && game.gameState === 'playing' && !game.isPaused) {
       // User pressed ESC - show pause menu
       game.togglePause();
     }
-    document.body.style.cursor = 'default'; // Show cursor
+    document.body.style.cursor = 'default';
+    document.body.classList.remove('playing');
   }
 };
 
@@ -92,9 +112,29 @@ document.getElementById('quit-button').addEventListener('click', () => {
 
 // Request pointer lock with Safari compatibility
 function requestPointerLock() {
-  const element = document.body;
+  // Safari works better with canvas element instead of body
+  const element = game && game.renderer ? game.renderer.domElement : document.body;
+  
+  // Normalize the API across browsers
   element.requestPointerLock = element.requestPointerLock ||
                                 element.mozRequestPointerLock ||
                                 element.webkitRequestPointerLock;
-  element.requestPointerLock();
+  
+  if (!element.requestPointerLock) {
+    console.error('❌ Pointer Lock API not available');
+    return;
+  }
+  
+  // Must be called synchronously in user event for Safari
+  try {
+    element.requestPointerLock();
+    console.log('✓ Pointer lock requested on', element.tagName);
+  } catch (error) {
+    console.error('❌ Pointer lock request failed:', error);
+  }
+  
+  // Force cursor hiding immediately (fallback for all browsers)
+  document.body.classList.add('playing');
+  document.body.style.cursor = 'none';
+  element.style.cursor = 'none';
 }

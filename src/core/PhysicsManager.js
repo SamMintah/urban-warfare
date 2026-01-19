@@ -7,12 +7,20 @@ export class PhysicsManager {
   }
 
   addCollider(mesh, type = 'box') {
+    // Update the bounds to current position
+    const bounds = new THREE.Box3().setFromObject(mesh);
+    
     const collider = {
       mesh,
       type,
-      bounds: new THREE.Box3().setFromObject(mesh)
+      bounds: bounds,
+      updateBounds: function() {
+        this.bounds.setFromObject(this.mesh);
+      }
     };
+    
     this.colliders.push(collider);
+    console.log('✓ Added collider:', mesh.position, 'Size:', bounds.getSize(new THREE.Vector3()));
     return collider;
   }
 
@@ -36,29 +44,44 @@ export class PhysicsManager {
       new THREE.Vector3(position.x + radius, position.y + height, position.z + radius)
     );
 
+    let hitObstacle = false;
+
     for (const collider of this.colliders) {
       if (playerBox.intersectsBox(collider.bounds)) {
-        // Simple collision resolution - push player out
-        const overlap = new THREE.Vector3();
-        playerBox.getCenter(overlap);
+        hitObstacle = true;
+        
+        // Calculate overlap amount
+        const playerCenter = new THREE.Vector3();
+        playerBox.getCenter(playerCenter);
         
         const colliderCenter = new THREE.Vector3();
         collider.bounds.getCenter(colliderCenter);
         
-        const direction = new THREE.Vector3().subVectors(overlap, colliderCenter).normalize();
+        const direction = new THREE.Vector3().subVectors(playerCenter, colliderCenter);
         
-        // Push player away from collision
-        position.x += direction.x * 0.1;
-        position.z += direction.z * 0.1;
+        // Calculate penetration depth
+        const playerSize = new THREE.Vector3();
+        playerBox.getSize(playerSize);
+        const colliderSize = new THREE.Vector3();
+        collider.bounds.getSize(colliderSize);
         
-        // Stop velocity in collision direction
-        if (Math.abs(direction.x) > Math.abs(direction.z)) {
+        const overlapX = (playerSize.x + colliderSize.x) / 2 - Math.abs(direction.x);
+        const overlapZ = (playerSize.z + colliderSize.z) / 2 - Math.abs(direction.z);
+        
+        // Push player out along the axis with least overlap
+        if (overlapX < overlapZ) {
+          // Push along X axis
+          position.x += Math.sign(direction.x) * overlapX;
           velocity.x = 0;
         } else {
+          // Push along Z axis
+          position.z += Math.sign(direction.z) * overlapZ;
           velocity.z = 0;
         }
       }
     }
+    
+    return hitObstacle;
   }
 
   raycast(origin, direction, maxDistance = 100) {

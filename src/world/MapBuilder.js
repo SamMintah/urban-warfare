@@ -278,8 +278,9 @@ export class MapBuilder {
     group.rotation.y = rotation;
     this.scene.add(group);
 
-    // Add collider for body
-    this.physicsManager.addCollider(body);
+    // Add collider for the entire car group (not just body)
+    group.updateMatrixWorld(true); // Update world matrix first
+    this.physicsManager.addCollider(group);
 
     return group;
   }
